@@ -10,4 +10,9 @@ $ export FLASK_APP=app.py
 $ flask run
 ```
 
-Then navigate in your browser to http://localhost:5000. 
+Then navigate in your browser to http://localhost:5000.
+The polymer code is just the polymer starting code you can get by running
+
+`polymer init starter-kit`
+
+using the polymer tools. More info on this starter kit can be found at the polymer website
