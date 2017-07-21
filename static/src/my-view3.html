@@ -9,6 +9,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html" />
+<link rel="import" href="../bower_components/iron-list/iron-list.html" />
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html" />
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-view3">
@@ -16,22 +19,149 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
 
-        padding: 10px;
+      iron-list {
+        flex: 1 1 auto;
+      }
+      /* Big */
+      @media screen and (min-width: 767px) {
+        .card {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          padding: 24px;
+          margin: auto;
+          margin-top:24px;
+          margin-bottom: 24px;
+          max-width: 800px;
+          min-width: 500px;
+          border-radius: 5px;
+          background-color: #fff;
+/*          color: #757575;*/
+        }
+        .row {
+          display:flex;
+          margin: 8px;
+        }
+        .header {
+          display: flex;
+        }
+        .cell-small {
+          width: 100px;
+          margin: 8px;
+        }
+        .cell-medium {
+          width: 130px;
+          margin: 8px;
+        }
+        .cell-large {
+          width: 150px;
+          margin: 8px;
+        }
+      }
+
+      /* Small */
+      @media screen and (max-width: 766px) {
+        .card {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          padding: 24px;
+          margin: 24px 4px 24px 4px;
+          border-radius: 5px;
+          background-color: #fff;
+          color: #757575;
+        }
+        .row {
+          display:flex;
+          font-size: 11px;
+        }
+        .header {
+          display: flex;
+          font-size: 12px;
+        }
+        .cell-small {
+          width: 100px;
+          margin: 4px;
+        }
+        .cell-medium {
+          width: 130px;
+          margin: 4px;
+        }
+        .cell-large {
+          width: 150px;
+          margin: 4px;
+        }
       }
     </style>
 
     <div class="card">
-      <div class="circle">3</div>
-      <h1>View Three</h1>
-      <p>Modus commodo minimum eum te, vero utinam assueverit per eu.</p>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p>
+      <h1>Leader board</h1>
+      <div class="header">
+        <div class="cell-small">Rank</div>
+        <div class="cell-large">Name</div>
+        <div class="cell-small">Running</div>
+        <div class="cell-small">Swimming</div>
+        <div class="cell-small">Biking</div>
+        <div class="cell-medium">Percent complete</div>
+      </div>
+      <div hidden$="[[hideSpinner]]" style="text-align: center;">
+        <paper-spinner id="spinny" active></paper-spinner>
+      </div>
+      <iron-list items="[[users]]" as="user">
+      <template>
+        <div>
+          <div class="row">
+            <div class="cell-small">[[_add_one(index)]]</div>
+            <div class="cell-large">[[user.username]]</div>
+            <div class="cell-small">[[user.running]]</div>
+            <div class="cell-small">[[user.swimming]]</div>
+            <div class="cell-small">[[user.biking]]</div>
+            <div class="cell-medium">[[_format(user.percent_complete)]]</div>
+          </div>
+        </div>
+      </template>
+      </iron-list>
     </div>
+    <iron-ajax
+      id="leaderBoard"
+      url="/getLeaderBoard"
+      handle-as="json"
+      on-response="handleGetLeaderBoard"
+      on-error="handleGetLeaderBoardError"
+      method="GET"
+      content-type="application/json"
+      auto
+      debounce-duration="300"></iron-ajax>
   </template>
 
   <script>
     Polymer({
-      is: 'my-view3'
+      is: 'my-view3',
+      properties: {
+        users: {
+          type: Array,
+          value: []
+        }
+      },
+      _format: function(num)
+      {
+        return num.toFixed(2);
+      },
+      _add_one: function(i)
+      {
+        return i + 1;
+      },
+      handleGetLeaderBoard: function(request)
+      {
+        this.users = request.detail.response;
+        this.$.spinny.active = false;
+        this.hideSpinner = true;
+      },
+      handleGetLeaderBoardError: function()
+      {
+
+      }
     });
   </script>
 </dom-module>

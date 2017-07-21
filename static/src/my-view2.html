@@ -9,6 +9,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="my-view2">
@@ -19,19 +23,114 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         padding: 10px;
       }
+      /* Big */
+      @media screen and (min-width: 767px) {
+        .card {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          padding: 24px;
+          margin: auto;
+          margin-top:24px;
+          margin-bottom: 24px;
+          max-width: 500px;
+          border-radius: 5px;
+          background-color: #fff;
+        }
+      }
+
+      /* Small */
+      @media screen and (max-width: 766px) {
+        .card {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          padding: 24px;
+          margin: 24px 4px 24px 4px;
+          border-radius: 5px;
+          background-color: #fff;
+          color: #757575;
+        }
+      }
+      #errorToast {
+        --paper-toast-background-color: #D32F2F;
+        --paper-toast-color: white;
+        text-align: center;
+      }
+      #successToast {
+        --paper-toast-background-color: green;
+        --paper-toast-color: white;
+        text-align: center;
+      }
     </style>
 
     <div class="card">
-      <div class="circle">2</div>
-      <h1>View Two</h1>
-      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.</p>
-      <p>Id nam odio natum malorum, tibique copiosae expetenda mel ea.Detracto suavitate repudiandae no eum. Id adhuc minim soluta nam.Id nam odio natum malorum, tibique copiosae expetenda mel ea.</p>
+      <h1>Enter your most recent workout</h1>
+      <paper-input id='running' style="max-width:300px" type="number" label="Running (in miles)"></paper-input>
+      <paper-input id='biking' style="max-width:300px" type="number" label="Biking (in miles)"></paper-input>
+      <paper-input id='swimming' style="max-width:300px" type="number" label="Swimming (in laps)"></paper-input>
+      <div style="display: flex; justify-content:center;"><paper-button style="align-self: center; border: 1px solid lightgrey;" on-tap="update">Submit</paper-button></div>
+      <paper-toast></paper-toast>
     </div>
+    <iron-ajax
+      id="updateUserStats"
+      url="/updateUserStats"
+      handle-as="json"
+      on-response="handleUpdateUserStats"
+      on-error="handleUpdateUserStatsError"
+      method="GET"
+      content-type="application/json"
+      debounce-duration="300"></iron-ajax>
+    <paper-toast id="errorToast" class="fit-bottom"></paper-toast>
+    <paper-toast id="successToast" class="fit-bottom"></paper-toast>
   </template>
 
   <script>
     Polymer({
-      is: 'my-view2'
+      is: 'my-view2',
+      update: function()
+      {
+        var run = 0;
+        var bike = 0;
+        var swim = 0;
+
+        if(this.$.running.value == '' &&
+           this.$.biking.value == '' &&
+           this.$.swimming.value == '')
+           {
+             this.$.errorToast.text = 'Must enter at least one field in order to submit'
+             this.$.errorToast.open();
+             return;
+           }
+
+        if(this.$.running.value != '')
+        {
+          run = this.$.running.value;
+        }
+
+        if (this.$.biking.value != '')
+        {
+          bike = this.$.biking.value;
+        }
+
+        if(this.$.swimming.value != '')
+        {
+          swim = this.$.swimming.value;
+        }
+
+        var params = {running: run,
+                      biking: bike,
+                      swimming: swim};
+        this.$.updateUserStats.params = params;
+        this.$.updateUserStats.generateRequest();
+      },
+      handleUpdateUserStats: function(request)
+      {
+        console.log("Updated stats");
+        this.$.successToast.text = 'Successfully updated stats'
+        this.$.successToast.open();
+      },
+      handleUpdateUserStatsError: function(request, error)
+      {
+        this.$.errorToast.text = request.detail.request.xhr.response.error;
+        this.$.errorToast.open();
+      }
     });
   </script>
 </dom-module>

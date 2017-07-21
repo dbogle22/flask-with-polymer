@@ -8,8 +8,9 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="shared-styles.html">
+<link rel="import" href="../bower_components/polymer/polymer.html" />
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html" />
+<link rel="import" href="shared-styles.html" />
 
 <dom-module id="my-view1">
   <template>
@@ -19,19 +20,91 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         padding: 10px;
       }
+      /* Big */
+      @media screen and (min-width: 767px) {
+        .card {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          padding: 24px;
+          margin: auto;
+          margin-top:24px;
+          margin-bottom: 24px;
+          max-width: 500px;
+          border-radius: 5px;
+          background-color: #fff;
+/*          color: #757575;*/
+        }
+      }
+
+      /* Small */
+      @media screen and (max-width: 766px) {
+        .card {
+          box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+          padding: 24px;
+          margin: 24px 4px 24px 4px;
+          border-radius: 5px;
+          background-color: #fff;
+          color: #757575;
+        }
+      }
     </style>
 
     <div class="card">
-      <div class="circle">1</div>
-      <h1>View One</h1>
-      <p>Ut labores minimum atomorum pro. Laudem tibique ut has.
-      <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>
+      <h1>Your stats</h1>
+      <div>
+        <span>Running: </span>
+        [[user.running]]
+      </div>
+      <div>
+        <span>Biking:</span>
+        [[user.biking]]
+      </div>
+      <div>
+        <span>Swimming:</span>
+          [[user.swimming]]
+      </div>
+      <div>
+        <span><b>Percent completed: [[_format(user.percent_complete)]]%</b></span>
+      </div>
     </div>
+    <iron-ajax
+      id="getUserStats"
+      url="/getUserStats"
+      handle-as="json"
+      on-response="handleGetUserStats"
+      on-error="handleGetUserStatsError"
+      method="GET"
+      content-type="application/json"
+      auto
+      debounce-duration="300"></iron-ajax>
   </template>
 
   <script>
     Polymer({
-      is: 'my-view1'
+      is: 'my-view1',
+      properties: {
+        user: {
+          type: Object
+        }
+      },
+      _format: function(num)
+      {
+        return num.toFixed(2);
+      },
+      handleGetUserStats: function(request)
+      {
+        if (request.detail.response != undefined)
+        {
+          this.user = request.detail.response
+        }
+        else
+        {
+          console.log(request.detail);
+        }
+      },
+      handleGetUserStatsError: function(request, error)
+      {
+
+      }
     });
   </script>
 </dom-module>
